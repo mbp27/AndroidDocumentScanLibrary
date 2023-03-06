@@ -241,7 +241,7 @@ public class PickImageFragment extends Fragment {
         Bitmap original
                 = BitmapFactory.decodeFileDescriptor(
                 fileDescriptor.getFileDescriptor(), null, options);
-        return original;
+        return Utils.scaleBitmap(getActivity(), original);
     }
 
     @Override

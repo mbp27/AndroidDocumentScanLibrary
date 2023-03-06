@@ -103,37 +103,7 @@ public class ResultFragment extends Fragment {
     }
 
     public void setScannedImage(Bitmap scannedImage) {
-        scannedImageView.setImageBitmap(bitmapResizeByDisplaySize(scannedImage));
-    }
-
-    public Bitmap bitmapResizeByDisplaySize(Bitmap imageBitmap) {
-        Bitmap bitmap = imageBitmap;
-        float heightbmp = bitmap.getHeight();
-        float widthbmp = bitmap.getWidth();
-
-        // Get Screen width
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        float height = displaymetrics.heightPixels / 3;
-        float width = displaymetrics.widthPixels / 3;
-
-        int convertHeight = (int) height, convertWidth = (int) width;
-
-        // higher
-        if (heightbmp > height) {
-            convertHeight = (int) height - 20;
-            bitmap = Bitmap.createScaledBitmap(bitmap, convertWidth,
-                    convertHeight, true);
-        }
-
-        // wider
-        if (widthbmp > width) {
-            convertWidth = (int) width - 20;
-            bitmap = Bitmap.createScaledBitmap(bitmap, convertWidth,
-                    convertHeight, true);
-        }
-
-        return bitmap;
+        scannedImageView.setImageBitmap(scannedImage);
     }
 
     private class DoneButtonClickListener implements View.OnClickListener {
