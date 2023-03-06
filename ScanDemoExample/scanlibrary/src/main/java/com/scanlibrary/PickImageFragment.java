@@ -230,7 +230,7 @@ public class PickImageFragment extends Fragment {
     private Bitmap getBitmap(Uri selectedimg) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         try {
-            int quality = getArguments().getInt("quality", 1);
+            int quality = getArguments().getInt("quality", 6);
             options.inSampleSize = quality;
         } catch (Exception e) {
             options.inSampleSize = 1;
