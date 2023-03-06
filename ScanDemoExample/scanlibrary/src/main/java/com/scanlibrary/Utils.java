@@ -37,12 +37,13 @@ public class Utils {
     }
 
     public static Bitmap scaleBitmap(Context context, Bitmap mBitmap) {
-        // Get Screen width
+        // Get Screen Size
         DisplayMetrics displaymetrics = new DisplayMetrics();
         Activity activity = (Activity) context;
         activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
 
-        int ScaleSize = displaymetrics.widthPixels; //max Height or width to Scale
+        // int ScaleSize = displaymetrics.heightPixels;
+        int ScaleSize = 1600;
         int width = mBitmap.getWidth();
         int height = mBitmap.getHeight();
         float excessSizeRatio = width > height ? (float)((float)width / (float)ScaleSize) : (float)((float)height / (float)ScaleSize);
