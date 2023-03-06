@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,7 +103,37 @@ public class ResultFragment extends Fragment {
     }
 
     public void setScannedImage(Bitmap scannedImage) {
-        scannedImageView.setImageBitmap(scannedImage);
+        scannedImageView.setImageBitmap(bitmapResizeByDisplaySize(scannedImage));
+    }
+
+    public Bitmap bitmapResizeByDisplaySize(Bitmap imageBitmap) {
+        Bitmap bitmap = imageBitmap;
+        float heightbmp = bitmap.getHeight();
+        float widthbmp = bitmap.getWidth();
+
+        // Get Screen width
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        float height = displaymetrics.heightPixels / 3;
+        float width = displaymetrics.widthPixels / 3;
+
+        int convertHeight = (int) height, convertWidth = (int) width;
+
+        // higher
+        if (heightbmp > height) {
+            convertHeight = (int) height - 20;
+            bitmap = Bitmap.createScaledBitmap(bitmap, convertWidth,
+                    convertHeight, true);
+        }
+
+        // wider
+        if (widthbmp > width) {
+            convertWidth = (int) width - 20;
+            bitmap = Bitmap.createScaledBitmap(bitmap, convertWidth,
+                    convertHeight, true);
+        }
+
+        return bitmap;
     }
 
     private class DoneButtonClickListener implements View.OnClickListener {
@@ -160,7 +191,7 @@ public class ResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 transformed = original;
-                                scannedImageView.setImageBitmap(original);
+                                setScannedImage(original);
                                 e.printStackTrace();
                                 dismissDialog();
                                 onClick(v);
@@ -170,7 +201,7 @@ public class ResultFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            scannedImageView.setImageBitmap(transformed);
+                            setScannedImage(transformed);
                             dismissDialog();
                         }
                     });
@@ -197,7 +228,7 @@ public class ResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 transformed = original;
-                                scannedImageView.setImageBitmap(original);
+                                setScannedImage(original);
                                 e.printStackTrace();
                                 dismissDialog();
                                 onClick(v);
@@ -207,7 +238,7 @@ public class ResultFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            scannedImageView.setImageBitmap(transformed);
+                            setScannedImage(transformed);
                             dismissDialog();
                         }
                     });
@@ -226,7 +257,7 @@ public class ResultFragment extends Fragment {
                     showProgressDialog(getResources().getString(R.string.applying_filter));
                 }
                 transformed = rotoriginal;
-                scannedImageView.setImageBitmap(rotoriginal);
+                setScannedImage(rotoriginal);
                 dismissDialog();
             } catch (OutOfMemoryError e) {
                 e.printStackTrace();
@@ -253,7 +284,7 @@ public class ResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 transformed = original;
-                                scannedImageView.setImageBitmap(original);
+                                setScannedImage(original);
                                 e.printStackTrace();
                                 dismissDialog();
                                 onClick(v);
@@ -263,7 +294,7 @@ public class ResultFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            scannedImageView.setImageBitmap(transformed);
+                            setScannedImage(transformed);
                             dismissDialog();
                         }
                     });
@@ -300,7 +331,7 @@ public class ResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 transformed = original;
-                                scannedImageView.setImageBitmap(original);
+                                setScannedImage(original);
                                 e.printStackTrace();
                                 dismissDialog();
                                 onClick(v);
@@ -310,7 +341,7 @@ public class ResultFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            scannedImageView.setImageBitmap(transformed);
+                            setScannedImage(transformed);
                             dismissDialog();
                         }
                     });
@@ -345,7 +376,7 @@ public class ResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 transformed = original;
-                                scannedImageView.setImageBitmap(original);
+                                setScannedImage(original);
                                 e.printStackTrace();
                                 dismissDialog();
                                 onClick(v);
@@ -355,7 +386,7 @@ public class ResultFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            scannedImageView.setImageBitmap(transformed);
+                            setScannedImage(transformed);
                             dismissDialog();
                         }
                     });
