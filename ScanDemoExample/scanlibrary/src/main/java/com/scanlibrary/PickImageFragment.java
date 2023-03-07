@@ -2,7 +2,10 @@ package com.scanlibrary;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -41,6 +44,13 @@ public class PickImageFragment extends Fragment {
     private Uri fileUri;
     private IScanner scanner;
     private static final int MY_CAMERA_REQUEST_CODE = 100;
+    int PERMISSION_ALL = 1;
+    String[] PERMISSIONS = {
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -68,6 +78,9 @@ public class PickImageFragment extends Fragment {
             handleIntentPreference();
         } else {
             getActivity().finish();
+        }
+        if (!Utils.hasPermissions(getActivity(), PERMISSIONS)) {
+            ActivityCompat.requestPermissions(getActivity(), PERMISSIONS, PERMISSION_ALL);
         }
     }
 
@@ -125,25 +138,21 @@ public class PickImageFragment extends Fragment {
 
     public void openCamera() {
         camorgal = 0;
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            File file = createImageFile();
-            boolean isDirectoryCreated = file.getParentFile().mkdirs();
-            Log.d("", "openCamera: isDirectoryCreated: " + isDirectoryCreated);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        File file = createImageFile();
+        boolean isDirectoryCreated = file.getParentFile().mkdirs();
+        Log.d("", "openCamera: isDirectoryCreated: " + isDirectoryCreated);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             String aut = getActivity().getApplicationContext().getPackageName() + ".fileprovider"; // As defined in Manifest
-                Uri tempFileUri = FileProvider.getUriForFile(getActivity().getApplicationContext(),
+            Uri tempFileUri = FileProvider.getUriForFile(getActivity().getApplicationContext(),
                     aut,
                     file);
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFileUri);
-            } else {
-                Uri tempFileUri = Uri.fromFile(file);
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFileUri);
-            }
-            startActivityForResult(cameraIntent, ScanConstants.START_CAMERA_REQUEST_CODE);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFileUri);
         } else {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, MY_CAMERA_REQUEST_CODE);
+            Uri tempFileUri = Uri.fromFile(file);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFileUri);
         }
+        startActivityForResult(cameraIntent, ScanConstants.START_CAMERA_REQUEST_CODE);
     }
 
     private File createImageFile() {
@@ -161,61 +170,56 @@ public class PickImageFragment extends Fragment {
         Log.d("", "onActivityResult" + resultCode);
         Bitmap bitmap = null;
         if (resultCode == Activity.RESULT_OK) {
-            try {
-                switch (requestCode) {
-                    case ScanConstants.START_CAMERA_REQUEST_CODE:
-                        bitmap = getBitmap(fileUri);
-                        break;
-
-                    case ScanConstants.PICKFILE_REQUEST_CODE:
-                        bitmap = getBitmap(data.getData());
-                        break;
+            if (data != null) {
+                try {
+                    switch (requestCode) {
+                        case ScanConstants.START_CAMERA_REQUEST_CODE:
+                            bitmap = getBitmap(fileUri);
+                            break;
+                        case ScanConstants.PICKFILE_REQUEST_CODE:
+                            bitmap = getBitmap(data.getData());
+                            break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         } else {
             getActivity().finish();
         }
         if (bitmap != null) {
-            
-            if ( camorgal == 0 )
-            {
-            //PickImageFragment.this.getActivity().getContentResolver().notifyChange(fileUri, null);
-            File imageFile = new File(fileUri.getPath());
-            ExifInterface exif = null;
-            
-            try
-            {
-                exif = new ExifInterface(imageFile.getAbsolutePath());
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            
-            int orientation = 0;
-            if (exif != null)
-            {
-                orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            }
-            
-            int rotate = 0;
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-            }
+            if (camorgal == 0) {
+                //PickImageFragment.this.getActivity().getContentResolver().notifyChange(fileUri, null);
+                File imageFile = new File(fileUri.getPath());
+                ExifInterface exif = null;
 
-            android.graphics.Matrix matrix = new android.graphics.Matrix();
-            matrix.postRotate(rotate);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                try {
+                    exif = new ExifInterface(imageFile.getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                int orientation = 0;
+                if (exif != null){
+                    orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                }
+
+                int rotate = 0;
+                switch (orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        rotate = 270;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        rotate = 180;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        rotate = 90;
+                        break;
+                }
+
+                android.graphics.Matrix matrix = new android.graphics.Matrix();
+                matrix.postRotate(rotate);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             }
             postImagePick(bitmap);
         }
@@ -244,16 +248,5 @@ public class PickImageFragment extends Fragment {
         return Utils.scaleBitmap(getActivity(), original);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_CAMERA_REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera();
-            } else {
-                Toast.makeText(getActivity(), "camera permission denied", Toast.LENGTH_LONG).show();
-            }
 
-        }
-    }
 }

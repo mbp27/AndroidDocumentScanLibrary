@@ -2,11 +2,16 @@ package com.scanlibrary;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,12 +49,26 @@ public class Utils {
 
         // int ScaleSize = displaymetrics.heightPixels;
         int ScaleSize = 1600;
-        int width = mBitmap.getWidth();
         int height = mBitmap.getHeight();
+        int width = mBitmap.getWidth();
+        if (height < ScaleSize || width < ScaleSize) {
+            return mBitmap;
+        }
         float excessSizeRatio = width > height ? (float)((float)width / (float)ScaleSize) : (float)((float)height / (float)ScaleSize);
         Bitmap bitmap = Bitmap.createScaledBitmap(
                 mBitmap,(int) (width/excessSizeRatio),(int) (height/excessSizeRatio), true);
         //mBitmap.recycle(); if you are not using mBitmap Obj
         return bitmap;
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
